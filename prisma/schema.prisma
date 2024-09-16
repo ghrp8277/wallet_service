@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum WalletStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum Currency {
+  USD
+  EUR
+  KRW
+  JPY
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model Wallet {
+  id          Int           @id @default(autoincrement())
+  userId      Int           @unique
+  balance     Float         @default(0)
+  status      WalletStatus  @default(ACTIVE)
+  currency    Currency      @default(KRW)
+  password    String
+  isLocked    Boolean       @default(false)
+  lockReason  String?
+  lastAccessedAt DateTime?  @default(now())
+  description String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  isDefault   Boolean       @default(false)
+  transactions Transaction[]
+}
+
+model Transaction {
+  id           Int              @id @default(autoincrement())
+  walletId     Int
+  amount       Float
+  type         TransactionType
+  status       TransactionStatus @default(PENDING)
+  referenceId  String?
+  fee          Float?            @default(0)
+  createdBy    Int
+  updatedBy    Int?
+  ipAddress    String?
+  createdAt    DateTime          @default(now())
+  wallet       Wallet            @relation(fields: [walletId], references: [id])
+}
