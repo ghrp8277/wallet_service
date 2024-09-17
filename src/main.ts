@@ -1,18 +1,26 @@
-import { NestFactory } from '@nestjs/core'
-import { MicroserviceOptions, Transport } from '@nestjs/microservices'
-import { AppModule } from './app.module'
-import { join } from 'path'
+import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { AppModule } from './app.module';
+import { join } from 'path';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-    const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
-        transport: Transport.GRPC,
-        options: {
-            package: 'walletproto',
-            protoPath: join(__dirname, './protos/wallet.proto'),
-            url: '0.0.0.0:50052',
-        },
-    })
+  const app = await NestFactory.create(AppModule);
 
-    await app.listen()
+  const configService = app.get(ConfigService);
+
+  const grpcUrl = configService.get<string>('GRPC_URL');
+  const grpcPackage = configService.get<string>('GRPC_PACKAGE');
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.GRPC,
+    options: {
+      package: grpcPackage,
+      protoPath: join(__dirname, './protos/wallet.proto'),
+      url: grpcUrl,
+    },
+  });
+
+  await app.startAllMicroservices();
 }
-bootstrap()
+bootstrap();

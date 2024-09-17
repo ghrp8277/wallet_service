@@ -1,4 +1,4 @@
 export interface DepositRequest {
-    userId: number;
-    amount: number;
+  userId: number;
+  amount: number;
 }
