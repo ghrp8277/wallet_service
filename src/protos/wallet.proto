@@ -2,19 +2,32 @@ syntax = "proto3";
 
 package walletproto;
 
-service UserService {
-    rpc getUsers(getBooksRequest) returns (getUsersResponse) {}
+import "common.proto";
+
+service WalletService {
+    rpc healthCheck(EmptyRequest) returns (HealthCheckResponse) {}
+    rpc createWallet(CreateWalletRequest) returns (Response) {}
+    rpc deposit(DepositRequest) returns (Response) {}
+    rpc withdraw(WithdrawRequest) returns (Response) {}
 }
 
-message getBooksRequest{
-
+message HealthCheckResponse {
+    string status = 1; 
 }
 
-message getUsersResponse {
-    repeated User users = 1;
+message CreateWalletRequest {
+    int32 userId = 1;        
+    string currency = 2;      
+    string password = 3;      
+    bool isDefault = 4;       
 }
 
-message User {
-    int32 id = 1;
-    string name = 2;
+message DepositRequest {
+    int32 userId = 1; 
+    double amount = 2;  
+}
+
+message WithdrawRequest {
+    int32 userId = 1; 
+    double amount = 2; 
 }
