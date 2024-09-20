@@ -16,24 +16,19 @@ export class WalletController {
 
   @GrpcMethod('WalletService', 'createWallet')
   async createWallet(data: CreateWalletRequest) {
-    const result = await this.walletService.createWallet(
-      data.userId,
-      data.currency as any,
-      data.password,
-      data.isDefault,
-    );
+    const result = await this.walletService.createWallet(data);
     return { result: JSON.stringify(result) };
   }
 
   @GrpcMethod('WalletService', 'deposit')
   async deposit(data: DepositRequest) {
-    const result = await this.walletService.deposit(data.userId, data.amount);
+    const result = await this.walletService.deposit(data);
     return { result: JSON.stringify(result) };
   }
 
   @GrpcMethod('WalletService', 'withdraw')
   async withdraw(data: WithdrawRequest) {
-    const result = await this.walletService.withdraw(data.userId, data.amount);
+    const result = await this.walletService.withdraw(data);
     return { result: JSON.stringify(result) };
   }
 }

@@ -8,6 +8,10 @@ import {
   WalletAlreadyExistsException,
   WalletNotFoundException,
 } from '@/exceptions';
+import { CreateWalletRequest } from '@/requests/create-wallet.request';
+import { DepositRequest } from '@/requests/deposit.request';
+import { WithdrawRequest } from '@/requests/withdraw.request';
+import { mapCurrency } from '@/common/currency';
 
 @Injectable()
 export class WalletService {
@@ -49,14 +53,9 @@ export class WalletService {
     }
   }
 
-  public async createWallet(
-    userId: number,
-    currency: Currency,
-    password: string,
-    isDefault: boolean,
-  ): Promise<{ walletId: number }> {
-    await this.checkDuplicateWallet(userId);
-    const wallet = await this.createNewWallet(userId, currency, password, isDefault);
+  public async createWallet(data: CreateWalletRequest): Promise<{ walletId: number }> {
+    await this.checkDuplicateWallet(data.userId);
+    const wallet = await this.createNewWallet(data.userId, mapCurrency(data.currency), data.password, data.isDefault);
 
     return {
       walletId: wallet.id,
@@ -105,31 +104,31 @@ export class WalletService {
     });
   }
 
-  public async deposit(userId: number, amount: number): Promise<{ balance: number; transactionId: number }> {
-    if (amount <= 0) {
+  public async deposit(data: DepositRequest): Promise<{ balance: number; transactionId: number }> {
+    if (data.amount <= 0) {
       throw new InvalidAmountException();
     }
 
-    const wallet = await this.findWalletByUserId(userId);
-    const updatedWallet = await this.updateWalletBalance(wallet.id, wallet.balance + amount);
-    const transaction = await this.createTransaction(wallet.id, amount, TransactionType.DEPOSIT, userId);
+    const wallet = await this.findWalletByUserId(data.userId);
+    const updatedWallet = await this.updateWalletBalance(wallet.id, wallet.balance + data.amount);
+    const transaction = await this.createTransaction(wallet.id, data.amount, TransactionType.DEPOSIT, data.userId);
 
     return { balance: updatedWallet.balance, transactionId: transaction.id };
   }
 
-  public async withdraw(userId: number, amount: number): Promise<{ balance: number; transactionId: number }> {
-    if (amount <= 0) {
+  public async withdraw(data: WithdrawRequest): Promise<{ balance: number; transactionId: number }> {
+    if (data.amount <= 0) {
       throw new InvalidAmountException();
     }
 
-    const wallet = await this.findWalletByUserId(userId);
+    const wallet = await this.findWalletByUserId(data.userId);
 
-    if (wallet.balance < amount) {
+    if (wallet.balance < data.amount) {
       throw new InsufficientBalanceException();
     }
 
-    const updatedWallet = await this.updateWalletBalance(wallet.id, wallet.balance - amount);
-    const transaction = await this.createTransaction(wallet.id, amount, TransactionType.WITHDRAWAL, userId);
+    const updatedWallet = await this.updateWalletBalance(wallet.id, wallet.balance - data.amount);
+    const transaction = await this.createTransaction(wallet.id, data.amount, TransactionType.WITHDRAWAL, data.userId);
 
     return { balance: updatedWallet.balance, transactionId: transaction.id };
   }
