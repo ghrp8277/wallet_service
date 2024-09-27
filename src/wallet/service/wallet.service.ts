@@ -12,10 +12,31 @@ import { CreateWalletRequest } from '@/requests/create-wallet.request';
 import { DepositRequest } from '@/requests/deposit.request';
 import { WithdrawRequest } from '@/requests/withdraw.request';
 import { mapCurrency } from '@/common/currency';
+import { GetWalletRequest } from '@/requests/get-wallet.request';
 
 @Injectable()
 export class WalletService {
   constructor(private prisma: PrismaService) {}
+
+  public async getWalletByWalletId(data: GetWalletRequest) {
+    const wallet = await this.prisma.wallet.findFirst({
+      where: {
+        id: data.walletId,
+      },
+      select: {
+        id: true,
+        balance: true,
+        currency: true,
+        createdAt: true,
+      },
+    });
+
+    if (!wallet) {
+      throw new WalletNotFoundException();
+    }
+
+    return wallet;
+  }
 
   private async findWalletByUserId(userId: number) {
     const wallet = await this.prisma.wallet.findUnique({

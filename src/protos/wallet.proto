@@ -1,11 +1,16 @@
 syntax = "proto3";
 
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+option java_outer_classname = "WalletProto";
+
 package walletproto;
 
 import "common.proto";
 
 service WalletService {
     rpc healthCheck(EmptyRequest) returns (HealthCheckResponse) {}
+    rpc getWallet(GetWalletRequest) returns (Response) {}
     rpc createWallet(CreateWalletRequest) returns (Response) {}
     rpc deposit(DepositRequest) returns (Response) {}
     rpc withdraw(WithdrawRequest) returns (Response) {}
@@ -13,6 +18,10 @@ service WalletService {
 
 message HealthCheckResponse {
     string status = 1; 
+}
+
+message GetWalletRequest {
+    int32 walletId = 1;
 }
 
 message CreateWalletRequest {

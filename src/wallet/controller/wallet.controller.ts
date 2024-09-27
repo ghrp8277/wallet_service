@@ -4,6 +4,7 @@ import { WalletService } from '../service/wallet.service';
 import { CreateWalletRequest } from '@/requests/create-wallet.request';
 import { DepositRequest } from '@/requests/deposit.request';
 import { WithdrawRequest } from '@/requests/withdraw.request';
+import { GetWalletRequest } from '@/requests/get-wallet.request';
 
 @Controller('wallet')
 export class WalletController {
@@ -17,6 +18,12 @@ export class WalletController {
   @GrpcMethod('WalletService', 'createWallet')
   async createWallet(data: CreateWalletRequest) {
     const result = await this.walletService.createWallet(data);
+    return { result: JSON.stringify(result) };
+  }
+
+  @GrpcMethod('WalletService', 'getWallet')
+  async getWallet(data: GetWalletRequest) {
+    const result = await this.walletService.getWalletByWalletId(data);
     return { result: JSON.stringify(result) };
   }
 
